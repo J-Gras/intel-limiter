@@ -7,8 +7,7 @@ module Intel;
 export {
 	## Default matching threshold for for single intelligence items that is
 	## used in case the loaded intel file does not specify expire metadata.
-	## TODO: what about values < 1
-	const default_matching_threshold: count = 1 &redef;
+	option default_matching_threshold: count = 1;
 
 	redef record MetaData += {
 		## Matching threshold for the intelligence item. The intelligence
