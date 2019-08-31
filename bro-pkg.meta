@@ -1,0 +1,6 @@
+[package]
+description = Limiter for Zeek's intelligence framework.
+credits = Jan Grashoefer <jan.grashoefer@gmail.com>
+tags = intel, limits, threshold
+script_dir = scripts
+test_command = cd testing && btest -d
