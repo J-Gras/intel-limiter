@@ -30,6 +30,7 @@ event Intel::match(s: Seen, items: set[Item])
 			remove(item);
 			# Don't wait for the manager to remove local indicator
 			#remove_indicator(item);
+			Reporter::warning(fmt("Intel framework removed heavy hitter: %s.", item));
 			}
 		}
 	}
