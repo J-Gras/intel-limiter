@@ -28,8 +28,8 @@ event Intel::match(s: Seen, items: set[Item])
 			 intel_hits[item$indicator, item$indicator_type] > heavy_hitter_threshold )
 			{
 			remove(item);
-			# Don't wait for the manager to remove local indicator
-			#remove_indicator(item);
+			# In a cluster, hits will be generated but not logged until
+			# the worker receives the remove from the manager.
 			Reporter::warning(fmt("Intel framework removed heavy hitter: %s.", item));
 			}
 		}
