@@ -1,19 +1,18 @@
-# @TEST-EXEC: bro -r $TRACES/ticks.pcap heavy-hitter %INPUT
+# @TEST-EXEC: zeek -r $TRACES/ticks.pcap item-threshold %INPUT
 # @TEST-EXEC: cat intel.log > output
 # @TEST-EXEC: cat .stdout >> output
 # @TEST-EXEC: btest-diff output
 
-# @TEST-START-FILE intel.dat
-#fields	indicator	indicator_type	meta.source	meta.desc
-1.0.0.0	Intel::ADDR	source1	this host is bad
-2.0.0.0	Intel::ADDR	source1	this host is bad
-# @TEST-END-FILE
-
-redef Intel::read_files += { "intel.dat" };
 redef enum Intel::Where += { SOMEWHERE };
-redef Intel::heavy_hitter_interval = 4sec;
-redef Intel::heavy_hitter_threshold = 2;
-redef table_expire_interval = 2sec;
+redef Intel::default_matching_threshold = 3;
+
+event zeek_init()
+	{
+	Intel::insert([$indicator="2.0.0.0", $indicator_type=Intel::ADDR, $meta=[
+		$source="source1", $matching_threshold=2]]);
+	Intel::insert([$indicator="2.0.0.0", $indicator_type=Intel::ADDR, $meta=[
+		$source="source2", $matching_threshold=4]]);
+	}
 
 global runs = 0;
 
@@ -25,30 +24,31 @@ event connection_established(c: connection)
 	switch (runs)
 		{
 		case 1:
-			print "Trigger: 1.0.0.0";
-			Intel::seen([$host=1.0.0.0, $where=SOMEWHERE]);
 			print "Trigger: 2.0.0.0";
 			Intel::seen([$host=2.0.0.0, $where=SOMEWHERE]);
 			break;
 		case 2:
-			print "Trigger: 1.0.0.0";
-			Intel::seen([$host=1.0.0.0, $where=SOMEWHERE]);
+			print "Trigger: 2.0.0.0";
+			Intel::seen([$host=2.0.0.0, $where=SOMEWHERE]);
+			# Hit reported for 2.0.0.0 - 1 meta
+			break;
+		case 3:
 			print "Trigger: 2.0.0.0";
 			Intel::seen([$host=2.0.0.0, $where=SOMEWHERE]);
 			break;
-		case 3:
-			print "Trigger: 1.0.0.0";
-			Intel::seen([$host=1.0.0.0, $where=SOMEWHERE]);
-			break;
-		case 4:
-			print "Trigger: 1.0.0.0";
-			Intel::seen([$host=1.0.0.0, $where=SOMEWHERE]);
-			# Hit should not be reported anymore
+		case 5:
+			print "Trigger: 2.0.0.0";
+			Intel::seen([$host=2.0.0.0, $where=SOMEWHERE]);
+			# Hit reported for 2.0.0.0 - 2 meta
 			break;
 		case 6:
 			print "Trigger: 2.0.0.0";
 			Intel::seen([$host=2.0.0.0, $where=SOMEWHERE]);
-			# Hit should be reported
+			break;
+		case 7:
+			print "Trigger: 2.0.0.0";
+			Intel::seen([$host=2.0.0.0, $where=SOMEWHERE]);
+			# Hit reported for 2.0.0.0 - 1 meta
 			break;
 		}
 

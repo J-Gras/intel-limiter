@@ -1,11 +1,11 @@
 # @TEST-SERIALIZE: comm
 #
-# @TEST-EXEC: btest-bg-run manager-1 BROPATH=$BROPATH:.. CLUSTER_NODE=manager-1 bro %INPUT
-# @TEST-EXEC: btest-bg-run worker-1  BROPATH=$BROPATH:.. CLUSTER_NODE=worker-1 bro -r $TRACES/ticks.pcap --pseudo-realtime %INPUT
+# @TEST-EXEC: btest-bg-run manager-1 ZEEKPATH=$ZEEKPATH:.. CLUSTER_NODE=manager-1 zeek %INPUT
+# @TEST-EXEC: btest-bg-run worker-1  ZEEKPATH=$ZEEKPATH:.. CLUSTER_NODE=worker-1 zeek -r $TRACES/ticks.pcap --pseudo-realtime %INPUT
 # @TEST-EXEC: btest-bg-wait -k 13
 # @TEST-EXEC: btest-diff manager-1/intel.log
 
-# @TEST-START-FILE cluster-layout.bro
+# @TEST-START-FILE cluster-layout.zeek
 redef Cluster::nodes = {
 	["manager-1"] = [$node_type=Cluster::MANAGER, $ip=127.0.0.1, $p=37757/tcp],
 	["worker-1"]  = [$node_type=Cluster::WORKER,  $ip=127.0.0.1, $p=37760/tcp, $manager="manager-1"],
@@ -39,7 +39,7 @@ event Cluster::node_up(name: string, id: string)
 # Worker
 
 @if ( Cluster::local_node_type() == Cluster::WORKER )
-event bro_init()
+event zeek_init()
 	{
 	suspend_processing();
 	}
